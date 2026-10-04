@@ -1,0 +1,21 @@
+ANGKRINGAN POS — PWA UNTUK WINDOWS
+
+Isi folder ini:
+- index.html, style.css, script.js: aplikasi asli dengan perubahan minimal untuk PWA
+- manifest.json: nama dan mode tampilan aplikasi
+- service-worker.js: cache untuk membuka antarmuka saat offline
+- icons/: ikon aplikasi
+
+CARA UJI DI WINDOWS
+1. Ekstrak ZIP ke sebuah folder.
+2. Buka folder tersebut di VS Code.
+3. Instal ekstensi Live Server jika belum ada.
+4. Klik kanan index.html > Open with Live Server.
+5. Di Chrome atau Edge, buka menu browser lalu pilih Install page as app / Instal halaman sebagai aplikasi (nama menu dapat berbeda).
+6. Setelah terinstal, buka Angkringan POS dari Start Menu. Jendelanya akan tampil tanpa address bar biasa.
+
+PENTING
+- Service worker/PWA perlu dijalankan lewat localhost (Live Server) atau HTTPS, bukan dengan membuka file:// langsung.
+- Offline mode hanya mencache antarmuka dan file aplikasi. Fitur yang membutuhkan internet/layanan luar tetap membutuhkan koneksi.
+- Data transaksi/menu menggunakan localStorage. Penyimpanan browser berbeda berdasarkan origin. Jika aplikasi lama sebelumnya dibuka langsung melalui file://, data di sana tidak otomatis berpindah ke versi localhost/PWA. Jangan hapus versi lama sebelum memastikan data penting sudah dicadangkan.
+- Simpan salinan ZIP ini sebagai cadangan sebelum melakukan perubahan lanjutan.

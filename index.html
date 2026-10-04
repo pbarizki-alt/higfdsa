@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#16161f">
+<meta name="description" content="Aplikasi kasir Angkringan POS untuk penjualan, kasbon, rekap, dan pengeluaran.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>🍢 Angkringan POS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">🍢</span>
+    <span>Angkringan POS</span>
+  </div>
+  <nav class="nav" id="nav">
+    <button class="nav-btn active" data-tab="kasir">Kasir</button>
+    <button class="nav-btn" data-tab="kasbon">Kasbon <span class="badge" id="badgeKasbon">0</span></button>
+    <button class="nav-btn" data-tab="rekap">Rekap</button>
+    <button class="nav-btn" data-tab="pengeluaran">Pengeluaran</button>
+    <button class="nav-btn" data-tab="menu">Kelola Menu</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= KASIR ================= -->
+  <section class="tab-panel active" id="tab-kasir">
+
+    <div class="kasbon-banner" id="kasbonEditBanner" style="display:none">
+      <span id="kasbonEditText"></span>
+      <button class="btn btn-sm btn-ghost" id="btnCancelKasbonEdit">✖ Batal Edit</button>
+    </div>
+
+    <div class="kasir-layout">
+      <div class="kasir-left">
+        <div class="cat-tabs" id="catTabs"></div>
+        <div class="item-grid" id="itemGrid"></div>
+      </div>
+
+      <aside class="kasir-right">
+        <h2 class="panel-title">Keranjang</h2>
+        <div class="cart-items" id="cartItems"></div>
+
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">Rp0</strong>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="pay-block">
+          <div class="pay-label">Metode Pembayaran</div>
+          <div class="pay-methods">
+            <label class="pay-opt">
+              <input type="radio" name="payMethod" value="tunai" checked>
+              <span>💵 Tunai</span>
+            </label>
+            <label class="pay-opt">
+              <input type="radio" name="payMethod" value="dana">
+              <span>📱 Dana</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="cashBlock">
+          <div class="pay-label">Uang Diterima</div>
+          <input type="number" id="cashInput" class="input" placeholder="0" min="0" step="500">
+          <div class="change-row" id="changeRow">
+            <span>Kembalian</span>
+            <strong id="changeDisplay">Rp0</strong>
+          </div>
+        </div>
+
+        <input type="text" id="customerName" class="input" placeholder="Nama pelanggan (untuk kasbon)">
+
+        <div class="cart-actions">
+          <button class="btn btn-success" id="btnBayar">💵 Bayar Lunas</button>
+          <button class="btn btn-warning" id="btnKasbon">📝 Kasbon</button>
+          <button class="btn btn-ghost" id="btnClearCart">🗑 Kosongkan</button>
+        </div>
+
+        <!-- Tombol Pendapatan Lainnya -->
+        <button type="button" class="btn btn-other-income" id="btnOpenOtherIncome">
+          ➕ Pendapatan Lainnya (di luar menu)
+        </button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= KASBON ================= -->
+  <section class="tab-panel" id="tab-kasbon">
+    <h2 class="panel-title">Daftar Kasbon / Belum Bayar</h2>
+    <div id="kasbonList" class="list"></div>
+  </section>
+
+  <!-- ================= REKAP ================= -->
+  <section class="tab-panel" id="tab-rekap">
+    <div class="rekap-head">
+      <h2 class="panel-title" style="margin:0">Rekap Penjualan</h2>
+      <button class="btn btn-primary" id="btnDownloadCSV">⬇ Download CSV</button>
+    </div>
+
+    <div class="bizday-setting">
+      <span class="bizday-label">🌙 Jam tutup harian</span>
+      <input type="number" id="closeHourInput" class="input" min="0" max="12" step="1" value="4">
+      <span class="bizday-hint">
+        Transaksi sebelum jam ini dihitung sebagai <strong>hari sebelumnya</strong> —
+        biar pesanan lewat tengah malam tetap masuk ke rekap hari itu.
+      </span>
+    </div>
+
+    <div class="period-tabs" id="periodTabs">
+      <button data-period="today" class="active">Hari Ini</button>
+      <button data-period="week">Minggu Ini</button>
+      <button data-period="month">Bulan Ini</button>
+      <button data-period="all">Semua</button>
+      <button data-period="custom">📅 Pilih Tanggal</button>
+    </div>
+
+    <div class="date-range" id="dateRange" style="display:none">
+      <div class="date-field">
+        <label>Dari Tanggal</label>
+        <input type="date" id="rekapStart" class="input">
+      </div>
+      <div class="date-field">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="rekapEnd" class="input">
+      </div>
+      <button class="btn btn-primary" id="btnApplyRange" style="align-self:flex-end">✔ Terapkan</button>
+      <button class="btn btn-ghost" id="btnResetRange" style="align-self:flex-end">🔄 Reset</button>
+    </div>
+
+    <div class="range-info" id="rangeInfo" style="display:none"></div>
+
+    <h3 class="sub-title" style="margin-top:0">💰 Pemasukan</h3>
+    <div class="stat-grid" id="statGrid"></div>
+
+    <h3 class="sub-title">💸 Pengeluaran & Laba</h3>
+    <div class="stat-grid" id="statGrid2"></div>
+
+    <h3 class="sub-title">
+      <span>🧾 Transaksi</span>
+      <button class="btn btn-sm btn-danger" id="btnDeleteAllTrx">🗑 Hapus Semua</button>
+    </h3>
+    <div id="rekapTrx" class="list"></div>
+
+    <h3 class="sub-title">
+      <span>💸 Detail Pengeluaran</span>
+      <button class="btn btn-sm btn-danger" id="btnDeleteAllExp">🗑 Hapus Semua</button>
+    </h3>
+    <div id="rekapExp" class="list"></div>
+  </section>
+
+  <!-- ================= PENGELUARAN ================= -->
+  <section class="tab-panel" id="tab-pengeluaran">
+    <h2 class="panel-title">Catat Pengeluaran</h2>
+    <form class="form-row" id="formExp">
+      <input type="date" id="expDate" class="input" required>
+      <select id="expCat" class="input" required>
+        <option value="warung">🍢 Warung (Makanan & Minuman)</option>
+        <option value="rokok">🚬 Rokok</option>
+      </select>
+      <input type="text" id="expDesc" class="input" placeholder="Keterangan (belanja, gas, dll)" required>
+      <input type="number" id="expAmount" class="input" placeholder="Jumlah (Rp)" required min="0">
+      <button type="submit" class="btn btn-primary">Tambah</button>
+    </form>
+    <div id="expList" class="list"></div>
+  </section>
+
+  <!-- ================= MENU ================= -->
+  <section class="tab-panel" id="tab-menu">
+    <h2 class="panel-title">Kelola Menu</h2>
+
+    <!-- Form tambah/edit menu -->
+    <form class="form-row" id="formMenu">
+      <input type="hidden" id="menuId">
+      <input type="text" id="menuName" class="input" placeholder="Nama item" required>
+      <select id="menuCat" class="input" required></select>
+      <input type="number" id="menuPrice" class="input" placeholder="Harga (Rp)" required min="0">
+      <button type="submit" class="btn btn-primary" id="menuSubmitBtn">Tambah</button>
+      <button type="button" class="btn btn-ghost" id="menuCancelBtn" style="display:none">Batal</button>
+    </form>
+
+    <!-- Filter kategori -->
+    <div class="cat-tabs" id="menuFilterTabs">
+      <button class="cat-tab active" data-filter="all">Semua</button>
+      <button class="cat-tab" data-filter="Makanan">🍢 Makanan</button>
+      <button class="cat-tab" data-filter="Minuman">🥤 Minuman</button>
+      <button class="cat-tab" data-filter="Rokok Bungkus">🚬 Rokok Bungkus</button>
+      <button class="cat-tab" data-filter="Rokok Ecer">🚬 Rokok Ecer</button>
+    </div>
+
+    <div id="menuList" class="list"></div>
+  </section>
+
+</main>
+
+<!-- ================= MODAL: Pendapatan Lainnya ================= -->
+<div id="otherIncomeModal" class="modal-overlay" style="display:none"
+     onclick="if(event.target===this)closeOtherIncomeModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>🛍️ Pendapatan Lainnya</h3>
+      <button type="button" class="modal-close" onclick="closeOtherIncomeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label for="otherName">Nama Item</label>
+      <input type="text" id="otherName" class="input"
+             placeholder="Contoh: Nutrisari Sachet / Kopi Sachet">
+
+      <label for="otherPrice" style="margin-top:10px">Harga (Rp)</label>
+      <input type="number" id="otherPrice" class="input"
+             placeholder="0" min="0" step="500"
+             oninput="updateOtherSubtotal()">
+
+      <label for="otherQty" style="margin-top:10px">Jumlah</label>
+      <input type="number" id="otherQty" class="input"
+             value="1" min="1"
+             oninput="updateOtherSubtotal()">
+
+      <div id="otherSubtotal" class="other-subtotal">Subtotal: Rp0</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" onclick="addOtherIncome()">➕ Tambahkan ke Keranjang</button>
+      <button type="button" class="btn btn-ghost" onclick="closeOtherIncomeModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
